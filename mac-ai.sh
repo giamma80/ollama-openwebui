@@ -293,6 +293,9 @@ stop_mlx() {
     kill -9 $pids >/dev/null 2>&1 || true
   fi
 
+}
+
+
 stop_ollama() {
   launchctl bootout "gui/$UID_NUM" "$OLLAMA_PLIST" >/dev/null 2>&1 || true
   pkill -f "ollama serve" >/dev/null 2>&1 || true
