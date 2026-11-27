@@ -279,10 +279,22 @@ preflight_report() {
   return 0
 }
 
+
 stop_mlx() {
+
   launchctl bootout "gui/$UID_NUM" "$MLX_PLIST" >/dev/null 2>&1 || true
-  pkill -f "$MLX_DIR/.venv/bin/mlx_lm.server" >/dev/null 2>&1 || true
+
+  pkill -f "mlx_lm.server" >/dev/null 2>&1 || true
+
+  local pids
+
+  pids="$(lsof -tiTCP:"${MLX_PORT}" -sTCP:LISTEN 2>/dev/null || true)"
+  if [[ -n "$pids" ]]; then
+    kill -9 $pids >/dev/null 2>&1 || true
+  fi
+
 }
+
 
 stop_ollama() {
   launchctl bootout "gui/$UID_NUM" "$OLLAMA_PLIST" >/dev/null 2>&1 || true
@@ -451,7 +463,8 @@ show_status() {
   launchctl list | grep -E "com\.local\.(mlx|ollama|openwebui)" || echo "Nessun servizio com.local.* attivo"
   echo ""
   echo "=== Porte in ascolto (8081=MLX, 11434=Ollama, 8080=WebUI) ==="
-  lsof -nP -iTCP:8081 -iTCP:11434 -iTCP:8080 -sTCP:LISTEN || echo "Nessuna porta attiva"
+
+  lsof -nP -iTCP:8081 -iTCP:11434 -iTCP:8080 -sTCP:LISTEN || true
   echo ""
   echo "=== Modello attivo MLX ==="
   curl -fsS "http://127.0.0.1:${MLX_PORT}/v1/models" 2>/dev/null || echo "MLX non attivo"
@@ -596,5 +609,3 @@ case "$CMD" in
     fail "Comando sconosciuto: '$CMD'. Esegui './mac-ai.sh --help' per vedere i comandi disponibili."
     ;;
 esac
-
-
