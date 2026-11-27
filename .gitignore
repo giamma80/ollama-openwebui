@@ -1,0 +1,7 @@
+.DS_Store
+*.log
+*.tar.gz
+.venv/
+data/
+.webui_secret_key
+
